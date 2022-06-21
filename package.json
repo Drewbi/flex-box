@@ -21,7 +21,7 @@
   "author": "Drew Alexander",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.5"
+    "@actions/core": "^1.9.0"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.31.1",
