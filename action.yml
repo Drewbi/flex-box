@@ -1,5 +1,6 @@
-name: 'Wait'
-description: 'Wait a designated number of milliseconds'
+name: 'FlexBox'
+description: 'Outputs a formatted '
+author: 'Drewbi'
 inputs:
   milliseconds:  # id of input
     description: 'number of milliseconds to wait'

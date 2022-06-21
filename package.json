@@ -1,7 +1,7 @@
 {
-  "name": "javascript-action",
+  "name": "flex-box",
   "version": "1.0.0",
-  "description": "JavaScript Action Template",
+  "description": "A github action allowing you to display (flex) your coding activity on a pinned gist (box) on your profile ",
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
@@ -11,19 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/javascript-action.git"
+    "url": "git+https://github.com/drewbi/flex-box"
   },
   "keywords": [
     "GitHub",
     "Actions",
     "JavaScript"
   ],
-  "author": "",
+  "author": "Drew Alexander",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/actions/javascript-action/issues"
-  },
-  "homepage": "https://github.com/actions/javascript-action#readme",
   "dependencies": {
     "@actions/core": "^1.2.5"
   },
