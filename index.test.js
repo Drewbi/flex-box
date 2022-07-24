@@ -1,12 +1,15 @@
 require('dotenv').config();
-const { getStats } = require('./utils');
+const { getOctokit } = require('./request')
+const { getStats, getCombinedText } = require('./utils')
 // const process = require('process');
 // const cp = require('child_process');
 // const path = require('path');
 
 test('returns data', async () => {
-  const results = await getStats(process.env.GITHUB_TOKEN)
-  console.log(results);
+  getOctokit(process.env.GITHUB_TOKEN)
+  const events = await getStats()
+  const text = getCombinedText(events)
+  console.log(text)
 })
 
 // shows how the runner will run a javascript action with env / stdout protocol

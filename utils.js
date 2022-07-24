@@ -1,8 +1,12 @@
-const { octokit } = require('./request')
+const { getOctokit } = require('./request')
 
-const getStats = async () => {
-    const { data } = await octokit.rest.activity.listPublicEvents();
-    return data;
+const getStats = async (privateAllowed) => {
+    const octokit = getOctokit()
+    const { data: { login: username } } = await octokit.rest.users.getAuthenticated();
+    const { data: events } = privateAllowed ?
+        await octokit.rest.activity.listEventsForAuthenticatedUser({username}) :
+        await octokit.rest.activity.listPublicEventsForUser({username});
+    return events
 }
 
 const MAX_LINES = 20
@@ -71,7 +75,7 @@ const getEventText = (events) => {
 }
 
 const getCombinedText = (events) => {
-    return [getCommitText, ...getEventText(events)].join('\n')
+    return [getCommitText(events), ...getEventText(events)].join('\n')
 }
 
 module.exports = { getStats, getCombinedText }
