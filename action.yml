@@ -1,14 +1,15 @@
 name: 'FlexBox'
-description: 'Outputs a formatted '
+description: 'Outputs a formatted list of latest user activity on Github'
 author: 'Drewbi'
 inputs:
-  milliseconds:  # id of input
-    description: 'number of milliseconds to wait'
-    required: true
-    default: '1000'
-outputs:
-  time: # output will be available to future steps
-    description: 'The current time after waiting'
+  includePrivate:
+    description: 'includes private activity as redacted'
+    required: false
+    default: false
+  useZalgoRedact:
+    description: 'uses the void to redact info'
+    required: false
+    default: false
 runs:
   using: 'node16'
   main: 'dist/index.js'
