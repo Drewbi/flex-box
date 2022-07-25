@@ -1,12 +1,11 @@
-const core = require('@actions/core');
-const { getOctokit } = require('./request')
-const { getStats } = require('./utils')
+const { getStats, updateGist } = require('./request');
+const { getCombinedText } = require('./utils');
 
 async function run() {
-  const authToken = core.getInput('GITHUB_TOKEN');
-  getOctokit(authToken)
-  const results = await getStats()
-  return results
+  const events = await getStats()
+  const text = getCombinedText(events)
+  const updated = await updateGist(text)
+  updated ? console.log('Gist was updated') : console.log('No updates')
 }
 
 run();

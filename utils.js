@@ -1,49 +1,48 @@
-const { getOctokit } = require('./request')
-
-const getStats = async (privateAllowed) => {
-    const octokit = getOctokit()
-    const { data: { login: username } } = await octokit.rest.users.getAuthenticated();
-    const { data: events } = privateAllowed ?
-        await octokit.rest.activity.listEventsForAuthenticatedUser({username}) :
-        await octokit.rest.activity.listPublicEventsForUser({username});
-    return events
-}
-
+const core = require('@actions/core');
+const { voidify } = require('./zalgo')
 const MAX_LINES = 20
 const MAX_LENGTH = 63
 
 const capitalize = str => str.slice(0, 1).toUpperCase() + str.slice(1)
 const truncate = str =>
-  str.length <= MAX_LENGTH ? str : str.slice(0, MAX_LENGTH - 3) + '...'
+  str.match(/[a-zA-Z0-9]/g).length <= MAX_LENGTH ? str : str.slice(0, MAX_LENGTH - 3) + '...'
+
+const redact = (str, publicEvent, isNumber) => {
+    if (publicEvent) return str
+    const length = Math.round(Math.random() * 8) + 6
+    const randomString = isNumber ? Math.round(Math.random() * 150).toString() : Math.random().toString(36).slice(2).replace(/[^a-z^0-9]+/g, '').slice(0, length);
+    const randomBoxes = randomString.replace(/./g, '█')
+    return core.getInput('USE_ZALGO_REDACT') === 'true' ? voidify(randomString) : randomBoxes
+}
 
 const serializers = {
-    WatchEvent: item => {
+    WatchEvent: item => { // Currently starred repos are classed as watch events
         return `🌟 Starred repo: ${item.repo.name}`
     },
     IssueCommentEvent: item => {
-        return `🗣 Commented on #${item.payload.issue.number} in ${item.repo.name}`
+        return `🗣 Commented on #${redact(item.payload.issue.number, item.public, true)} in ${redact(item.repo.name, item.public)}`
     },
     CreateEvent: item => {
         if(item.ref_type == 'repository')
-        return `🆕 Created new repo: ${item.repo.name}`
+        return `🆕 Created new repo: ${redact(item.repo.name, item.public)}`
         else
-        return `⑂ Created branch ${item.payload.ref} in repo: ${item.repo.name}`
+        return `⑂ Created branch ${redact(item.payload.ref, item.public)} in repo: ${redact(item.repo.name, item.public)}`
     },
     ForkEvent: item => {
-        return `ᛘ Forked repo: ${item.repo.name}`
+        return `ᛘ Forked repo: ${redact(item.repo.name, item.public)}`
     },
     IssuesEvent: item => {
         return `❗️ ${capitalize(item.payload.action)} issue #${
-        item.payload.issue.number
-        } in ${item.repo.name}`
+            redact(item.payload.issue.number, item.public, true)
+        } in ${redact(item.repo.name, item.public)}`
     },
     PullRequestEvent: item => {
         const emoji = item.payload.action === 'opened' ? '🆒' : '❌'
         const line = item.payload.pull_request.merged
         ? '🎉 Merged'
         : `${emoji} ${capitalize(item.payload.action)}`
-        return `${line} PR #${item.payload.pull_request.number} in ${
-        item.repo.name
+        return `${line} PR #${redact(item.payload.pull_request.number, item.public, true)} in ${
+            redact(item.repo.name, item.public)
         }`
     }
 }
@@ -64,13 +63,9 @@ const getCommitText = (events) => {
 
 const getEventText = (events) => {
     return events
-      // Filter out any boring activity
       .filter(event => serializers[event.type])
-      // We only have four lines to work with for other info
       .slice(0, MAX_LINES - 1)
-      // Call the serializer to construct a string
       .map(item => serializers[item.type](item))
-      // Truncate if necessary
       .map(truncate)
 }
 
@@ -78,4 +73,4 @@ const getCombinedText = (events) => {
     return [getCommitText(events), ...getEventText(events)].join('\n')
 }
 
-module.exports = { getStats, getCombinedText }
+module.exports = { getCombinedText }
